@@ -36,7 +36,8 @@
   --tc-menu-bg:#F0EFE7;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:none;font-smooth:never}
-html,body{height:100%;overflow:hidden;background:#808080}
+html,body{height:100%;overflow:auto;background:#808080}
+#MAIN-APP{min-width:1280px;min-height:700px}
 body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;font-size:12px;color:var(--win-txt);display:flex;flex-direction:column}
 button,input,select,textarea{font-family:inherit;font-size:12px}
 ::-webkit-scrollbar{width:16px;height:16px}
@@ -119,7 +120,7 @@ button,input,select,textarea{font-family:inherit;font-size:12px}
 .ph-close-btn{margin-left:auto;align-self:flex-start;padding:3px 10px;border:1px outset #C8C0B0;background:linear-gradient(to bottom,#F0EEE8,#D8D4C8);cursor:pointer;font-size:12px;color:#333;margin-top:2px}
 
 /* Layout */
-#APP-BODY{display:flex;flex:1;overflow:hidden}
+#APP-BODY{display:flex;flex:1;overflow:hidden;min-height:0}
 
 /* Left tree nav */
 #TREE-NAV{width:218px;background:var(--win-tree-bg);border-right:1px solid #A0A090;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
@@ -140,10 +141,10 @@ button,input,select,textarea{font-family:inherit;font-size:12px}
 .tree-filter input[type=checkbox]{width:13px;height:13px}
 
 /* Main content */
-#MAIN-CONTENT{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--win-bg)}
+#MAIN-CONTENT{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--win-bg);min-height:0}
 
 /* Content panels */
-.content-panel{flex:1;display:none;flex-direction:column;overflow:hidden}
+.content-panel{flex:1;display:none;flex-direction:column;overflow:hidden;min-height:0}
 .content-panel.active{display:flex}
 
 /* Inner window chrome */
@@ -670,6 +671,13 @@ const AVC=[
   {bg:'#FFF8E8',c:'#7A4808'},{bg:'#EEF2FF',c:'#3A4A8A'}
 ];
 
+// ── PROXY-KONFIG ──────────────────────────────────────────────
+// Efter att du deployat Cloudflare Workern (se cloudflare-worker.js):
+// klistra in dess URL här, t.ex.
+//   const SK_PROXY_URL='https://cosmiccare-proxy.dittkonto.workers.dev';
+// Lämnas den tom ('') används API-nyckelfältet som förut.
+const SK_PROXY_URL='';
+
 let USER={name:'Anna Lindqvist',role:'Läkare',region:'Region Stockholm',av:'AL'};
 let selReg='Region Stockholm',selRol='Läkare';
 let PATIENTS=[];
@@ -1026,7 +1034,7 @@ function renderSubPanel(name){
     case 'lakemedel': el.innerHTML=renderLakemedel(p); break;
     case 'diagnoser': el.innerHTML=renderDiagnoser(p); break;
     case 'patientuppgifter': el.innerHTML=renderPatientuppgifter(p); break;
-    case 'chartsearch': el.innerHTML=renderChartsearchPanel(); setTimeout(()=>{renderChartsearchList();if(p)skSelP(p.id);const k=sessionStorage.getItem('sk_key');const ki=document.getElementById('SK-APIKEY');if(k&&ki)ki.value=k;},50); break;
+    case 'chartsearch': el.innerHTML=renderChartsearchPanel(); setTimeout(()=>{renderChartsearchList();if(p)skSelP(p.id);const k=sessionStorage.getItem('sk_key');const ki=document.getElementById('SK-APIKEY');if(k&&ki)ki.value=k;if(SK_PROXY_URL){if(ki&&ki.parentElement)ki.parentElement.style.display='none';const st=document.getElementById('SK-STATUS');if(st){st.textContent='✓ Ansluten – ingen nyckel behövs';st.style.color='#059669';}}},50); break;
     case 'svar': el.innerHTML=renderSvar(p); break;
     case 'oversikter': el.innerHTML=renderOversikt(p); break;
     default:
@@ -1338,7 +1346,7 @@ function renderChartsearchPanel(){
     </div>
 
     <!-- Huvudinnehåll -->
-    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:#F0F4F8">
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:#F0F4F8;min-height:0">
 
       <!-- Toppbar -->
       <div style="background:white;border-bottom:1px solid #E8EDF2;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 1px 8px rgba(0,0,0,.04)">
@@ -1390,7 +1398,7 @@ function renderChartsearchPanel(){
       </div>
 
       <!-- Svarsfält -->
-      <div id="SK-MSGS" style="flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+      <div id="SK-MSGS" style="flex:1;overflow-y:auto;min-height:0;padding:20px 24px;display:flex;flex-direction:column;gap:14px">
         <div style="text-align:center;padding:48px 20px">
           <div style="width:64px;height:64px;background:linear-gradient(135deg,#0F4C81,#1A6FA8);border-radius:18px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(15,76,129,.25)">
             <svg width="28" height="28" viewBox="0 0 120 120" fill="none"><rect x="14" y="18" width="72" height="50" rx="6" stroke="white" stroke-width="6"/><line x1="24" y1="32" x2="56" y2="32" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.7"/><line x1="24" y1="42" x2="56" y2="42" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.7"/><line x1="24" y1="52" x2="42" y2="52" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.4"/><rect x="30" y="72" width="40" height="10" rx="3" stroke="white" stroke-width="4" opacity="0.6"/><line x1="40" y1="67" x2="60" y2="67" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.5"/><circle cx="74" cy="55" r="14" stroke="white" stroke-width="5"/><line x1="83" y1="64" x2="93" y2="74" stroke="white" stroke-width="5" stroke-linecap="round"/></svg>
@@ -2145,9 +2153,9 @@ ${vitalsBlock}
 ALLA JOURNALANTECKNINGAR:
 ${notesBlock}`;
 
-  // Hämta API-nyckel från fältet – aldrig hårdkodad
+  // Hämta API-nyckel från fältet – behövs bara om ingen proxy är konfigurerad
   const apiKey = document.getElementById('SK-APIKEY')?.value?.trim();
-  if(!apiKey){
+  if(!SK_PROXY_URL && !apiKey){
     rmSkTyp();
     addSkMsg('ai','<em>⚠ Ange din Claude API-nyckel i fältet längst ned i panelen.</em>');
     return;
@@ -2205,14 +2213,16 @@ Fråga: "Hur ska jag behandla patienten?"
 Perfekt svar: "Chartsearch ger inte kliniska rekommendationer – det beslutet är alltid ditt. Jag kan visa vad som redan är dokumenterat och planerat i journalen, om det är till hjälp."
 (Lägg märke till: EXAKT denna mening, ordagrant, absolut inget annat text – ingen Källa, ingen FÖLJDFRÅGOR.)`;
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const endpoint = SK_PROXY_URL || 'https://api.anthropic.com/v1/messages';
+    const reqHeaders = {'Content-Type':'application/json'};
+    if(!SK_PROXY_URL){
+      reqHeaders['x-api-key'] = apiKey;
+      reqHeaders['anthropic-version'] = '2023-06-01';
+      reqHeaders['anthropic-dangerous-direct-browser-access'] = 'true';
+    }
+    const response = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
+      headers: reqHeaders,
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 1500,
